@@ -1,6 +1,6 @@
 # Galactic_Lottery
 
-This Python script attempts to find a private key that matches a specific set of Bitcoin addresses associated with Satoshi Nakamoto, the pseudonymous creator of Bitcoin. It uses a combination of cryptographic functions and a bloom filter approach to efficiently search for matching keys by generating random private keys and checking them against a predefined set.
+This Python script attempts to find a private key that matches a specific set of Bitcoin addresses associated with Satoshi Nakamoto, the pseudonymous creator of Bitcoin. It uses a combination of cryptographic functions and a bloom filter approach to efficiently search for matching keys by generating random private keys and checking them against a predefined set. It was written to attempt to illustrate just how difficult it is to "hack" a bitcoin key.
 
 ## How It Works
 
