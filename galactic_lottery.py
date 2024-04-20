@@ -3,6 +3,8 @@ from ecdsa import SigningKey, SECP256k1
 from ecdsa.util import number_to_string
 import base58
 from KeyDatabase import satoshi_keys  # Import keys from KeyDatabase.py
+from bitarray import bitarray
+from math import log, ceil
 
 def hash_key(key):
     sha = hashlib.sha256()
@@ -25,24 +27,49 @@ def private_key_to_wif(private_key, compressed=True):
     # Create WIF by Base58 encoding the prefix + checksum
     return base58.b58encode(prefix + checksum).decode('utf-8')
 
-def try_keys(attempts):
+def create_bloom_filter(keys, error_rate=0.1):
+    num_keys = len(keys)
+    # Calculate the optimal size of the bloom filter based on the number of keys and desired error rate
+    bit_size = ceil(-num_keys * log(error_rate) / (log(2) ** 2))
+    # Calculate the optimal number of hash functions based on the size of the bloom filter and number of keys
+    num_hashes = ceil(bit_size / num_keys * log(2))
+    bloom_filter = bitarray(bit_size)
+    bloom_filter.setall(0)
+    for key in keys:
+        for i in range(num_hashes):
+            digest = hashlib.sha256((str(i) + key).encode()).digest()
+            index = int.from_bytes(digest, byteorder='big') % bit_size
+            bloom_filter[index] = 1
+    return bloom_filter, num_hashes
+
+def is_key_match(key, bloom_filter, num_hashes):
+    for i in range(num_hashes):
+        digest = hashlib.sha256((str(i) + key).encode()).digest()
+        index = int.from_bytes(digest, byteorder='big') % len(bloom_filter)
+        if not bloom_filter[index]:
+            return False
+    return True
+
+def try_keys(bloom_filter, num_hashes, attempts):
     for _ in range(100):  # Checking 100 keys
         sk = SigningKey.generate(curve=SECP256k1)
         vk = sk.verifying_key
         compressed_public_key = vk.to_string("compressed").hex()
         hashed_key = hash_key(compressed_public_key)
-        if hashed_key in satoshi_keys:
-            wif_key = private_key_to_wif(sk.privkey.secret_multiplier)
-            print(f"\rWinning private key found: {wif_key}", end='', flush=True)
-            return wif_key
+        if is_key_match(hashed_key, bloom_filter, num_hashes):
+            if hashed_key in satoshi_keys:
+                wif_key = private_key_to_wif(sk.privkey.secret_multiplier)
+                print(f"\rWinning private key found: {wif_key}", end='', flush=True)
+                return wif_key
         print(f"\r{attempts + _ + 1} attempts made so far. Current key: {sk.to_string().hex()}", end='', flush=True)
     return None
 
 def main():
     attempts = 0
     found_key = None
+    bloom_filter, num_hashes = create_bloom_filter(satoshi_keys)
     while found_key is None:
-        found_key = try_keys(attempts)
+        found_key = try_keys(bloom_filter, num_hashes, attempts)
         attempts += 100
 
 if __name__ == "__main__":
