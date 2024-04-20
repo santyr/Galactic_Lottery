@@ -5,6 +5,7 @@ import base58
 from KeyDatabase import satoshi_keys  # Import keys from KeyDatabase.py
 from bitarray import bitarray
 from math import log, ceil
+import sys
 
 def hash_key(key):
     sha = hashlib.sha256()
@@ -51,7 +52,7 @@ def is_key_match(key, bloom_filter, num_hashes):
     return True
 
 def try_keys(bloom_filter, num_hashes, attempts):
-    for _ in range(100):  # Checking 100 keys
+    while True:
         sk = SigningKey.generate(curve=SECP256k1)
         vk = sk.verifying_key
         compressed_public_key = vk.to_string("compressed").hex()
@@ -61,16 +62,18 @@ def try_keys(bloom_filter, num_hashes, attempts):
                 wif_key = private_key_to_wif(sk.privkey.secret_multiplier)
                 print(f"\rWinning private key found: {wif_key}", end='', flush=True)
                 return wif_key
-        print(f"\r{attempts + _ + 1} attempts made so far. Current key: {sk.to_string().hex()}", end='', flush=True)
-    return None
+        attempts += 1
+        print(f"\r{attempts} attempts made so far. Current key: {sk.to_string().hex()}", end='', flush=True)
 
 def main():
     attempts = 0
-    found_key = None
     bloom_filter, num_hashes = create_bloom_filter(satoshi_keys)
-    while found_key is None:
-        found_key = try_keys(bloom_filter, num_hashes, attempts)
-        attempts += 100
+    found_key = try_keys(bloom_filter, num_hashes, attempts)
+    if found_key:
+        print(f"\nWinning private key found: {found_key}")
+        sys.exit(0)
+    else:
+        print("\nNo matching private key found.")
 
 if __name__ == "__main__":
     main()
