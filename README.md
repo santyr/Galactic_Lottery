@@ -16,18 +16,19 @@ This Python script attempts to find a private key that matches a specific set of
   
 - **Progress Display**: The script uses `print()` statements with `end=''` and `flush=True` to display the progress and results on the console, overwriting the previous line with each update.
 
-## Note
+## Limitations and Considerations
 
-It is extremely unlikely for this script to ever find a matching private key for any of Satoshi Nakamoto's Bitcoin addresses due to the vast size of the private key space and the security properties of the Bitcoin system.
+- The script relies on a brute-force approach, which is extremely unlikely to succeed due to the enormous size of the private key space and the cryptographic security measures in place.
+- Attempting to find or guess private keys without permission raises ethical concerns and is likely illegal.
+- The script is computationally intensive and requires significant time and resources to iterate through a meaningful portion of the key space.
+- The script should not be used for any malicious purposes or to compromise the security and privacy of others' Bitcoin addresses.
 
-## Reasons for Improbability
+## Usage
 
-- **Enormous Key Space**: Bitcoin private keys are 256-bit numbers, which means there are 2^256 possible private keys, an astronomically large number.
-  
-- **Randomness of Private Keys**: Bitcoin private keys are generated using secure random number generators, making it highly unlikely to guess or stumble upon a specific private key.
-  
-- **Security of the Bitcoin System**: Bitcoin's use of elliptic curve cryptography and strong hash functions provides strong cryptographic security.
-  
-- **Probability Calculation**: The probability of finding a matching private key is approximately 10^-77.
-  
-- **Time and Resource Constraints**: Generating and checking private keys is computationally intensive, requiring an impractical amount of time and resources.
+1. Clone the repository or download the script file.
+2. Install the required dependencies: hashlib, secrets, ecdsa, base58.
+3. Modify the KeyDatabase.py file to include the target Bitcoin addresses you wish to find the private keys for.
+4. Run the script using a Python interpreter: python script_name.py.
+5. The script will start generating and checking private keys, displaying the progress and any found matches on the console.
+
+Please note that running this script is highly unlikely to yield any successful results and is primarily intended for educational and experimental purposes.
