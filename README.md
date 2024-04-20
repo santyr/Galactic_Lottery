@@ -4,7 +4,7 @@ This Python script attempts to find a private key that matches a specific set of
 
 ## How It Works
 
-- **Libraries and Modules**: The script imports `hashlib` for hashing, `secrets` for generating random numbers, `ecdsa` for elliptic curve cryptography, `base58` for encoding, and `logging` for logging messages.
+- **Libraries and Modules**: The script imports `hashlib` for hashing, `secrets` for generating random numbers, `ecdsa` for elliptic curve cryptography, `base58` for encoding.
   
 - **`hash_key()` Function**: This function takes a public key as input, hashes it using SHA-256 and RIPEMD-160 algorithms, and returns the resulting hash.
   
