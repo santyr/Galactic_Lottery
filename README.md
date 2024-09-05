@@ -13,8 +13,8 @@ This Python script attempts to find a private key that matches a specific set of
 
 ## Limitations and Considerations
 
-- Due to the vast size of Bitcoin's key space, the probability of finding a specific key is extremely low, making this script largely experimental.
-- The brute-force nature of the search, even with optimizations like a bloom filter, demands significant computational resources.
+- Due to the vast size of Bitcoin's key space, the probability of finding a specific key is extremely low, making this script largely futile.
+- The brute-force nature of the search, even with optimizations like a bloom filter, demands significant computational resources. Your laptop will get hot.  This is great in the Winter.  Maybe this script is actually a heater.
 - Ethical and legal implications arise when attempting to access or use private keys without explicit permission.
 
 ## Improbability of Finding a Matching Key
