@@ -1,44 +1,66 @@
 # Galactic_Lottery
 
-This Python script attempts to find a private key that matches a specific set of Bitcoin addresses associated with Satoshi Nakamoto, the pseudonymous creator of Bitcoin. It uses a combination of cryptographic functions and a bloom filter approach to efficiently search for matching keys by generating random private keys and checking them against a predefined set. It was written to attempt to illustrate just how difficult it is to "hack" a bitcoin key.
+A Python script that attempts to find a private key corresponding to a set of Bitcoin addresses associated with Satoshi Nakamoto. It leverages a combination of cryptographic operations and a Bloom filter to demonstrate the near-impossibility of brute-forcing a Bitcoin key.
+
+---
 
 ## How It Works
 
-- **Libraries and Modules**: The script leverages `hashlib` for hashing, `ecdsa` for elliptic curve cryptography, `base58` for encoding, `bitarray` for managing bloom filters, and a custom module `KeyDatabase` for Satoshi's known keys.
-- **`hash_key()` Function**: Takes a public key as input, hashes it with SHA-256 followed by RIPEMD-160, and returns the hash. This double hashing is part of Bitcoin's address creation algorithm.
-- **`private_key_to_wif()` Function**: Converts a private key to Wallet Import Format (WIF), adding necessary prefix and suffix bytes, calculating checksums, and encoding with Base58 to generate a standard Bitcoin private key in WIF.
-- **`create_bloom_filter()` Function**: Initializes a bloom filter tailored to the set of target keys to streamline the search process, optimizing both the space used and the speed of the query.
-- **`try_keys()` Function**: Iteratively generates keys, checks each against the bloom filter, and then performs a more detailed match against the Satoshi key set. If a match is found, the script outputs the WIF-formatted private key.
-- **`main()` Function**: Coordinates the script's operations, setting up the bloom filter and initiating the key search process. It tracks and prints each key attempt, showing ongoing progress and results.
+1. **Libraries and Modules**  
+   - **`hashlib`** for SHA-256 and RIPEMD-160 hashing.  
+   - **`base58`** for Base58 encoding.  
+   - **`bitarray`** for implementing a Bloom filter.  
+   - **[`secp256k1`](https://github.com/bitcoin-core/secp256k1)** for elliptic curve cryptography (via Python bindings).  
+   - **`KeyDatabase`** (custom) for importing known Satoshi keys.
+
+2. **`hash_key()` Function**  
+   - Accepts a public key (in bytes), applies SHA-256, then RIPEMD-160, returning the resulting 20-byte hash.  
+   - Mirrors part of Bitcoin’s standard address derivation process.
+
+3. **`private_key_to_wif()` Function**  
+   - Takes a 32-byte private key, prefixes with `0x80` (for mainnet), optionally adds `0x01` for compressed keys, then appends a 4-byte checksum (double SHA-256).  
+   - The result is encoded in Base58 to produce the standard Wallet Import Format (WIF).
+
+4. **`create_bloom_filter()` Function**  
+   - Builds a Bloom filter from the known Satoshi keys, using a configurable false-positive rate to size the filter and determine the number of hash functions.  
+   - Allows quick membership testing before performing a final set check.
+
+5. **`try_keys()` Function**  
+   - Continuously generates random private keys (via **libsecp256k1**).  
+   - Extracts the compressed public key, hashes it, and consults the Bloom filter for a possible match.  
+   - If potentially present, checks against the final set of Satoshi keys.  
+   - Prints progress on a single line (updates in place) and terminates if a matching key is (improbably) found.
+
+6. **`main()` Function**  
+   - Loads Satoshi’s known keys, converts them into byte format, and inserts them into both a Python set and the Bloom filter.  
+   - Invokes `try_keys()` to begin the brute-force process.  
+   - Continues indefinitely unless a match is discovered (which is extraordinarily unlikely).
+
+---
 
 ## Limitations and Considerations
 
-- Due to the vast size of Bitcoin's key space, the probability of finding a specific key is extremely low, making this script largely futile.
-- The brute-force nature of the search, even with optimizations like a bloom filter, demands significant computational resources. Your laptop will get hot.  This is great in the Winter.  Maybe this script is actually a heater.
-- Ethical and legal implications arise when attempting to access or use private keys without explicit permission.
+- **Huge Key Space**: The private key space is \(2^{256}\), an unfathomably large number, rendering success virtually impossible.  
+- **High Resource Usage**: Even with Bloom filter optimizations, this brute-force approach is CPU-intensive—and can make your computer quite warm.  
+- **Ethical & Legal Implications**: Attempting to recover keys without permission is ethically and legally questionable.
+
+---
 
 ## Improbability of Finding a Matching Key
 
-It is extremely unlikely for this script to ever find a matching private key for any of Satoshi Nakamoto's Bitcoin addresses due to the vast size of the private key space and the security properties of the Bitcoin system. Here are the main reasons why finding a matching key is improbable:
+- **256-bit Entropy**: There are approximately \(10^{77}\) possible private keys—more than the estimated atoms in the observable universe.  
+- **Uniform Distribution**: Bitcoin private keys are generated with secure randomness, minimizing the chance of accidental collisions.  
+- **Robust Cryptography**: The secp256k1 curve, SHA-256, and RIPEMD-160 are specifically chosen for their resistance to known attacks.  
+- **Probability**: Even billions of attempts per second are negligible against \(2^{256}\).  
+- **Time & Resources**: A successful match in our lifetimes (or the universe’s) is practically zero.
 
-- **Enormous Key Space**: Bitcoin private keys are 256-bit numbers, resulting in 2^256 possible private keys. This number, approximately 10^77 in decimal, is astronomically large—comparable to the estimated number of atoms in the observable universe. Even with the most powerful computers, brute-forcing through this entire key space is practically impossible.
-  
-- **Randomness of Private Keys**: Bitcoin private keys are typically generated using secure random number generators, ensuring that the keys are distributed uniformly across the key space. This uniformity makes it highly unlikely to guess or stumble upon a specific private key, even with a large number of attempts.
-
-- **Security of the Bitcoin System**: The Bitcoin system utilizes elliptic curve cryptography (specifically, the secp256k1 curve) along with the SHA-256 and RIPEMD-160 hash functions, providing robust cryptographic security. These algorithms are chosen for their resistance to known attacks and the computational difficulty of reversing or finding collisions.
-
-- **Probability Calculation**: The probability of finding a matching private key can be calculated as 1 divided by the total number of possible keys (2^256). This probability is incredibly small, approximately 10^-77. Even if the script generates and checks billions or trillions of keys per second, the chances of finding a match remain negligible.
-
-- **Time and Resource Constraints**: Generating and checking private keys is a computationally intensive process. Even with advanced hardware, the time and resources required to iterate through a significant portion of the key space are impractical. It would take an extraordinarily long time—many orders of magnitude longer than the age of the universe—to have a reasonable chance of finding a matching key.
-
-Understanding these factors is crucial when evaluating the practicality and ethical implications of attempting to find private keys associated with any Bitcoin address.
+---
 
 ## Usage
 
-1. Clone this repository or download the script to your local machine.
-2. Ensure you have Python 3.6 or later installed.
-3. Install the required dependencies:
+1. **Clone or Download**  
    ```bash
-   pip install ecdsa base58 bitarray hashlib
-
-
+   git clone https://github.com/YourUserName/Galactic_Lottery.git
+2. **Install Dependencies**
+```bash
+   pip install secp256k1 base58 bitarray
